@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.donkingliang.groupedadapter.adapter.GroupedRecyclerViewAdapter;
 import com.donkingliang.groupedadapter.holder.BaseViewHolder;
@@ -41,7 +42,7 @@ public class GroupedListAdapter extends GroupedRecyclerViewAdapter {
     @Override
     public int getChildrenCount(int groupPosition) {
         if (groupPosition == 0)
-            return 80;
+            return 10;
         return 1;
     }
 
@@ -76,8 +77,16 @@ public class GroupedListAdapter extends GroupedRecyclerViewAdapter {
 
     @Override
     public void onBindHeaderViewHolder(BaseViewHolder holder, int groupPosition) {
-
-
+        if (customViewHolder != null) {
+            TabLayoutMediator mediator = new TabLayoutMediator(headerViewHolder.tabLayout, customViewHolder.viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+                @Override
+                public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                    tab.setText("tab" + position);
+                }
+            });
+            //要执行这一句才是真正将两者绑定起来
+            mediator.attach();
+        }
     }
 
     @Override
@@ -91,7 +100,7 @@ public class GroupedListAdapter extends GroupedRecyclerViewAdapter {
             TabLayoutMediator mediator = new TabLayoutMediator(headerViewHolder.tabLayout, customViewHolder.viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
                 @Override
                 public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-
+                    tab.setText("tab" + position);
                 }
             });
             //要执行这一句才是真正将两者绑定起来
@@ -143,6 +152,7 @@ public class GroupedListAdapter extends GroupedRecyclerViewAdapter {
             fragments = new ArrayList<Fragment>();
             fragments.add(new RVFragment(50));
             fragments.add(new SecondFragment(10));
+            viewPager.setOffscreenPageLimit(ViewPager2.OFFSCREEN_PAGE_LIMIT_DEFAULT);
             viewPager.setAdapter(new FragmentStateAdapter(context.getSupportFragmentManager(), context.getLifecycle()) {
                 @NonNull
                 @Override
@@ -167,14 +177,16 @@ public class GroupedListAdapter extends GroupedRecyclerViewAdapter {
         }
 
         void updatePagerHeightForChild(View view, ViewPager2 pager) {
-            view.post(() -> {
-                int wMeasureSpec = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY);
-                int hMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-                view.measure(wMeasureSpec, hMeasureSpec);
-                if (pager.getLayoutParams().height != view.getMeasuredHeight()) {
-                    pager.setLayoutParams(new LinearLayout.LayoutParams(pager.getLayoutParams().width, view.getMeasuredHeight()));
-                }
-            });
+            if (view != null) {
+                view.post(() -> {
+                    int wMeasureSpec = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY);
+                    int hMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+                    view.measure(wMeasureSpec, hMeasureSpec);
+                    if (pager.getLayoutParams().height != view.getMeasuredHeight()) {
+                        pager.setLayoutParams(new LinearLayout.LayoutParams(pager.getLayoutParams().width, view.getMeasuredHeight()));
+                    }
+                });
+            }
         }
     }
 }
